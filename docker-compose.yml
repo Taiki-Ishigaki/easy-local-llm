@@ -1,0 +1,13 @@
+services:
+  litellm:
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./config:/app/config
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    command: >
+      litellm --config config/litellm.yaml --port 4000

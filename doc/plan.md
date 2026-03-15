@@ -1,94 +1,123 @@
-# Local LLM (uv oriented design)
+# Easy Local LLM (Minimal Semi‑Docker Architecture)
 
 ## 1. Purpose
 
-Provide a **one‑command installable local LLM environment** that works across multiple operating systems.
+Provide a **simple local LLM environment** that can be installed with minimal setup and used consistently across operating systems.
 
-Target OS:
+Design goal:
+
+> The user should focus on **using LLMs**, not operating LLM infrastructure.
+
+Target OS
 
 * macOS
 * Windows
 * Ubuntu / Linux
 * WSL
 
-Main use cases:
+Typical usage
 
-* Research and experimentation
+* Research experiments
 * LLM application development
-* RAG experiments
-* Agent development
+* Prompt testing
+* Agent prototyping
 
 ---
 
-## 2. Design Principles
+# 2. Design Philosophy
 
-Key design principles:
+This system intentionally keeps the architecture **minimal**.
+
+Principles:
 
 * OpenAI API compatible
-* Runs on CPU-only systems
-* Easy installation
-* Minimal OS dependency
-* Extensible architecture
+* Minimal infrastructure
+* Cross‑platform
+* Easy to install
+* Easy to understand
+
+The system separates responsibilities:
+
+| Component   | Responsibility          |
+| ----------- | ----------------------- |
+| Ollama      | Model execution         |
+| LiteLLM     | API compatibility layer |
+| Application | User code               |
+
+The goal is to **avoid building a complex LLM platform**.
 
 ---
 
-## 3. System Architecture
+# 3. System Architecture
+
+This project uses a **semi‑Docker architecture**.
+
+Ollama runs on the host machine while the API layer runs in Docker.
 
 ```
+Host Machine
+
+  Ollama
+  (local model execution)
+
+        │
+        │ http://localhost:11434
+        ▼
+
+Docker
+
+  LiteLLM Router
+
+        │
+        ▼
+
 Application
-    │
-    ▼
-OpenAI API Client
-    │
-    ▼
-LiteLLM Router
-    │
-    ├── Ollama (local models)
-    ├── OpenAI (optional)
-    ├── Claude (optional)
-    └── Gemini (optional)
 ```
 
-Roles:
+Roles
 
-| Component   | Role                  |
-| ----------- | --------------------- |
-| Application | User applications     |
-| OpenAI API  | Unified API interface |
-| LiteLLM     | Model routing         |
-| Ollama      | Local inference       |
+| Component   | Description                    |
+| ----------- | ------------------------------ |
+| Ollama      | Executes local models          |
+| LiteLLM     | Provides OpenAI compatible API |
+| Application | User research code             |
 
 ---
 
-## 4. Directory Structure
+# 4. Directory Structure
 
 ```
 easy-local-llm/
 
 install/
-    install.sh
-    install.ps1
+  install.sh
+  install.ps1
 
 config/
-    litellm.yaml
+  litellm.yaml
 
 app/
-    llm_client.py
+  llm_client.py
 
 scripts/
-    start_server.sh
-    test_llm.py
+  test_llm.py
+
+Docker/
+  Dockerfile
 
 pyproject.toml
 uv.lock
+
+docker-compose.yml
+
 README.md
 ```
 
 ---
 
-## 5. Installation Flow
+# 5. Installation Flow
 
-User commands:
+User setup
 
 ```
 git clone easy-local-llm
@@ -96,52 +125,62 @@ cd easy-local-llm
 ./install/install.sh
 ```
 
-Windows:
+Windows
 
 ```
 install/install.ps1
 ```
 
-Installation tasks:
+Installation steps
 
-* Install Ollama
-* Create uv environment
-* Install dependencies
-* Download model
-* Start API server
+1. Install Ollama
+2. Install uv
+3. Pull default model
+4. Build Docker container
 
 ---
 
-## 6. install.sh
+# 6. install.sh
 
 ```
 #!/bin/bash
 
 set -e
 
-# Install Ollama
+echo "Installing Ollama"
+
 curl -fsSL https://ollama.com/install.sh | sh
 
-# Install uv if missing
+
+echo "Installing uv"
+
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Setup python environment
-uv sync
 
-# Pull default model
+echo "Pulling default model"
+
 ollama pull phi3
+
+
+echo "Building docker image"
+
+docker compose build
+
 
 echo "Installation complete"
 ```
 
 ---
 
-## 7. pyproject.toml
+# 7. Python Environment (uv)
+
+`pyproject.toml`
 
 ```
 [project]
 name = "easy-local-llm"
 version = "0.1.0"
+
 dependencies = [
   "litellm",
   "openai",
@@ -150,31 +189,113 @@ dependencies = [
 ]
 ```
 
+uv is used for
+
+* dependency management
+* reproducible environments
+
 ---
 
-## 8. LiteLLM Configuration
+# 8. LiteLLM Configuration
 
 `config/litellm.yaml`
 
 ```
 model_list:
   - model_name: local-phi3
+
     litellm_params:
+
       model: ollama/phi3
-      api_base: http://localhost:11434
+
+      api_base: http://host.docker.internal:11434
+```
+
+`host.docker.internal` allows containers to access the host Ollama server.
+
+---
+
+# 9. Docker Compose
+
+`docker-compose.yml`
+
+This container runs LiteLLM and connects to Ollama running on the host machine.
+
+To ensure compatibility across operating systems, the configuration explicitly
+allows the container to access the host network.
+
+```
+version: "3"
+
+services:
+
+  litellm:
+
+    build: ./Docker
+
+    ports:
+
+      - "4000:4000"
+
+    volumes:
+
+      - ./config:/app/config
+
+    extra_hosts:
+
+      - "host.docker.internal:host-gateway"
+
+    command: >
+      uv run litellm --config config/litellm.yaml
+```
+
+Explanation
+
+* `host.docker.internal` allows Docker containers to access services running on the host.
+* `extra_hosts: host.docker.internal:host-gateway` ensures this works on Linux.
+
+This keeps the same connection configuration across
+
+* macOS
+* Windows
+* Linux
+* WSL
+
+LiteLLM can therefore consistently access Ollama using
+
+```
+http://host.docker.internal:11434
 ```
 
 ---
 
-## 9. Start LiteLLM Server
-
-`scripts/start_server.sh`
+# 10. Dockerfile
 
 ```
-uv run litellm --config config/litellm.yaml
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY pyproject.toml ./
+
+RUN pip install uv
+
+RUN uv pip install --system litellm openai httpx numpy
+
+COPY . .
 ```
 
-API endpoint:
+---
+
+# 11. Start Server
+
+Start LiteLLM container
+
+```
+docker compose up
+```
+
+API endpoint
 
 ```
 http://localhost:4000
@@ -182,7 +303,67 @@ http://localhost:4000
 
 ---
 
-## 10. Python Client
+# 12. Health Check and Connectivity
+
+To avoid debugging complexity, connectivity should be verified in two steps.
+
+Step 1 — Verify Ollama on the host
+
+```
+ollama list
+```
+
+or
+
+```
+curl http://localhost:11434/api/tags
+```
+
+Step 2 — Verify LiteLLM through the API layer
+
+```
+python scripts/test_llm.py
+```
+
+If step 1 works but step 2 fails, the issue is likely related to Docker networking or LiteLLM configuration.
+
+This separation simplifies troubleshooting.
+
+---
+
+# 13. Python Client
+
+```
+FROM python:3.11-slim
+
+WORKDIR /app
+
+COPY pyproject.toml ./
+
+RUN pip install uv
+
+RUN uv pip install --system litellm openai httpx numpy
+
+COPY . .
+```
+
+---
+
+# 11. Start Server
+
+```
+docker compose up
+```
+
+API endpoint
+
+```
+http://localhost:4000
+```
+
+---
+
+# 12. Python Client
 
 `app/llm_client.py`
 
@@ -198,8 +379,11 @@ client = OpenAI(
 def chat(prompt):
 
     resp = client.chat.completions.create(
+
         model="local-phi3",
-        messages=[{"role": "user", "content": prompt}]
+
+        messages=[{"role":"user","content":prompt}]
+
     )
 
     return resp.choices[0].message.content
@@ -207,7 +391,7 @@ def chat(prompt):
 
 ---
 
-## 11. Test Script
+# 13. Test Script
 
 `scripts/test_llm.py`
 
@@ -217,119 +401,83 @@ from app.llm_client import chat
 print(chat("Explain robotics briefly"))
 ```
 
-Run:
+Run
 
 ```
-uv run python scripts/test_llm.py
+python scripts/test_llm.py
 ```
 
 ---
 
-## 12. Default CPU Model
+# 14. Model Management Policy
 
-Default model:
+Model management is intentionally simple.
 
-```
-phi3
-```
+Rules
 
-Reasons:
+* Local models are managed by **Ollama**
+* Model files remain on the **host machine**
+* Docker containers do **not** store models
 
-* small model
-* fast CPU inference
-* stable quality
+Advantages
 
----
-
-## 13. Future Extensions
-
-Possible extensions:
-
-### RAG
-
-* Chroma
-* FAISS
-* Weaviate
-
-### Agents
-
-* LangGraph
-* CrewAI
-* AutoGen
-
-### Tool Calling
-
-* function calling
-* external APIs
-* robot control
+* simple architecture
+* no model duplication
+* easy model updates
 
 ---
 
-## 14. Research Benefits
+# 15. What This System Does NOT Include
 
-Advantages of this architecture:
+To keep the system simple, the following features are **not included initially**:
 
-| Feature         | Benefit               |
-| --------------- | --------------------- |
-| Cross‑platform  | Mac / Windows / Linux |
-| Unified API     | OpenAI compatible     |
-| Local inference | No cloud required     |
-| Cloud switching | Easy comparison       |
+* Vector databases
+* RAG pipelines
+* complex model caching
+* multi‑GPU inference
+* automatic hardware detection
 
-Example:
-
-```
-model="local-phi3"
-```
-
-can be changed to
-
-```
-model="gpt-4o"
-```
-
-without modifying application code.
+These can be added later if needed.
 
 ---
 
-## 15. Future GPU Architecture
+# 16. Future Extensions (Optional)
 
-Add GPU inference server:
+If the project grows, the following may be added later.
 
-```
-LiteLLM
-  ├─ Ollama
-  └─ vLLM
-```
+Possible additions
 
-This allows large models on GPU servers.
+* RAG systems
+* vector databases
+* evaluation pipelines
+* agent frameworks
+
+However the base design intentionally avoids these.
 
 ---
 
-## 16. Minimal Stack
+# 17. Minimal Stack
 
-Minimum required components:
+Host
 
 * Ollama
+
+Docker
+
 * LiteLLM
-* Python (uv environment)
+
+Application
+
+* Python client
+
+This keeps the environment **easy to install and easy to understand**.
 
 ---
 
-## 17. Target Users
+# 18. Target Users
 
 * Researchers
 * Developers
 * Students
-* AI application builders
 
----
-
-## 18. Future Improvements
-
-Possible improvements:
-
-* Automatic hardware detection
-* Automatic model selection
-* GUI installer
-* One‑click RAG setup
+Anyone who wants a **simple local OpenAI‑compatible LLM environment**.
