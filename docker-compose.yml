@@ -10,8 +10,14 @@ services:
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
+      LITELLM_PROVIDER: ${LITELLM_PROVIDER:-ollama}
       LITELLM_MODEL_NAME: ${LITELLM_MODEL_NAME:-local-phi3}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-phi3}
       OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://host.docker.internal:11434}
+      OPENAI_OSS_MODEL: ${OPENAI_OSS_MODEL:-gpt-oss:20b}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
     command: >
       sh -c "python scripts/render_litellm_config.py && litellm --config config/litellm.yaml --port 4000"
