@@ -97,7 +97,7 @@ If Ollama is already running in the background on your system, you can skip this
 Start the LiteLLM proxy server with:
 
 ```bash
-env DEBUG= .venv/bin/litellm -c config/litellm.yaml --telemetry False
+./scripts/start_server.sh
 ```
 
 After startup, the local OpenAI-compatible endpoint will be available at:
@@ -106,17 +106,14 @@ After startup, the local OpenAI-compatible endpoint will be available at:
 http://localhost:4000
 ```
 
-Notes:
-
-- `DEBUG=release` in the shell environment can break LiteLLM startup
-- `env DEBUG=` clears that value only for this command
+This script clears problematic environment values such as `DEBUG` and `PORT` before launching LiteLLM.
 
 ## Run the test script
 
 In another terminal:
 
 ```bash
-env UV_CACHE_DIR=/tmp/uv-cache uv run python scripts/test_llm.py
+uv run python scripts/test_llm.py
 ```
 
 This sends a prompt through:
@@ -183,7 +180,7 @@ DEBUG=release
 Start LiteLLM like this:
 
 ```bash
-env DEBUG= .venv/bin/litellm -c config/litellm.yaml --telemetry False
+./scripts/start_server.sh
 ```
 
 ### `ModuleNotFoundError` for LiteLLM proxy dependencies
@@ -195,6 +192,26 @@ uv sync
 ```
 
 This project needs `litellm[proxy]`, not only the base `litellm` package.
+
+### `.venv/bin/python` or `.venv/bin/litellm` is missing
+
+The virtual environment may not be created yet.
+
+Run:
+
+```bash
+uv sync
+```
+
+### `uv run` fails because of the cache directory
+
+This project includes [`uv.toml`](/home/ishigaki/local-llm/uv.toml), which points uv's cache to a project-local directory.
+
+In normal use, this should work without setting `UV_CACHE_DIR` manually:
+
+```bash
+uv run python scripts/test_llm.py
+```
 
 ### Cannot connect to `localhost:11434`
 

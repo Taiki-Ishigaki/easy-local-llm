@@ -2,4 +2,4 @@
 
 set -e
 
-uv run litellm --config config/litellm.yaml
+env DEBUG= PORT= .venv/bin/litellm -c config/litellm.yaml --port 4000
