@@ -63,6 +63,12 @@ To restart LiteLLM:
 ./scripts/restart_server.sh
 ```
 
+To see which model is currently selected:
+
+```bash
+./scripts/show_model.sh
+```
+
 ## Change provider and model with `.env`
 
 Copy `.env.example` to `.env`, then update the values for the provider you want:

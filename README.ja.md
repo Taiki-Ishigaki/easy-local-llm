@@ -63,6 +63,12 @@ uv run python scripts/test_llm.py
 ./scripts/restart_server.sh
 ```
 
+現在どのモデルに向いているか確認するとき:
+
+```bash
+./scripts/show_model.sh
+```
+
 ## `.env` でプロバイダとモデルを切り替える
 
 `.env.example` を `.env` にコピーして、使いたいプロバイダに合わせて値を変えます。

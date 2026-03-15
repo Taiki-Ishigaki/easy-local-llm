@@ -110,6 +110,12 @@ docker compose up -d
 ./scripts/restart_server.sh
 ```
 
+現在どのモデルに向いているか確認するとき:
+
+```bash
+./scripts/show_model.sh
+```
+
 ## Test
 
 別ターミナルで:
