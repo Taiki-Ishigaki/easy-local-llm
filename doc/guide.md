@@ -25,6 +25,7 @@ Application
 - Ollama model: `phi3`
 - LiteLLM endpoint: `http://localhost:4000`
 - LiteLLM -> Ollama: `http://host.docker.internal:11434`
+- `.env` で上書き可能
 
 ## Directory structure
 
@@ -123,7 +124,7 @@ client = OpenAI(
 
 ## LiteLLM routing
 
-[`config/litellm.yaml`](/home/ishigaki/local-llm/config/litellm.yaml):
+[`config/litellm.yaml`](/home/ishigaki/local-llm/config/litellm.yaml) は起動時に自動生成されます。
 
 ```yaml
 model_list:
@@ -134,6 +135,34 @@ model_list:
 ```
 
 `host.docker.internal` を使うことで、Docker コンテナからホスト上の Ollama に接続できます。[`docker-compose.yml`](/home/ishigaki/local-llm/docker-compose.yml) では Linux 向けに `host-gateway` も指定しています。
+
+### Model switching with `.env`
+
+まず `.env.example` をコピーします。
+
+```bash
+cp .env.example .env
+```
+
+例:
+
+```dotenv
+LITELLM_MODEL_NAME=local-llama32
+OLLAMA_MODEL=llama3.2
+OLLAMA_API_BASE=http://host.docker.internal:11434
+```
+
+このとき:
+
+- `LITELLM_MODEL_NAME` はアプリから指定する論理名
+- `OLLAMA_MODEL` はホストの Ollama に入っている実モデル名
+
+モデルを取得したあとに LiteLLM を再起動します。
+
+```bash
+ollama pull llama3.2
+docker compose up --build
+```
 
 ## Troubleshooting
 

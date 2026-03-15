@@ -38,12 +38,6 @@ ollama serve
 2. LiteLLM を起動
 
 ```bash
-docker compose up
-```
-
-または:
-
-```bash
 ./scripts/start_server.sh
 ```
 
@@ -54,6 +48,28 @@ uv run python scripts/test_llm.py
 ```
 
 うまくいけば `http://localhost:4000` 経由で `phi3` に接続します。
+
+## `.env` でモデルを切り替える
+
+`.env.example` を `.env` にコピーして、使いたいモデル名に変えます。
+
+```bash
+cp .env.example .env
+```
+
+```dotenv
+LITELLM_MODEL_NAME=local-llama32
+OLLAMA_MODEL=llama3.2
+```
+
+その後、モデルを取得して LiteLLM を再起動します。
+
+```bash
+ollama pull llama3.2
+./scripts/start_server.sh
+```
+
+これでアプリ側のコードを変えずに、`.env` だけで切り替えられます。
 
 ## Python usage
 
