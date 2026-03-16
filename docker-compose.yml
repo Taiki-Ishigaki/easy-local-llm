@@ -12,6 +12,7 @@ services:
     environment:
       LITELLM_PROVIDER: ${LITELLM_PROVIDER:-ollama}
       LITELLM_MODEL_NAME: ${LITELLM_MODEL_NAME:-local-phi3}
+      LITELLM_MODEL_CONFIG_FILE: ${LITELLM_MODEL_CONFIG_FILE:-config/models.json}
       OLLAMA_MODEL: ${OLLAMA_MODEL:-phi3}
       OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://host.docker.internal:11434}
       OPENAI_OSS_MODEL: ${OPENAI_OSS_MODEL:-gpt-oss:20b}

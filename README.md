@@ -127,6 +127,12 @@ ollama pull gpt-oss:20b
 
 This keeps your app code unchanged and switches the routed model through `.env`.
 
+Large local models can take a while to answer. If needed, increase the client timeout in `.env`:
+
+```dotenv
+LITELLM_TIMEOUT_SECONDS=180
+```
+
 ## Register multiple models
 
 For orchestration tools such as LangGraph, it is often better to expose several routed models at once.

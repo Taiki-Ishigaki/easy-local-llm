@@ -3,13 +3,19 @@ from typing import Any
 
 from openai import OpenAI
 
-from app.config import DEFAULT_MODEL, LITELLM_API_KEY, LITELLM_OPENAI_BASE_URL, model_aliases
+from app.config import (
+    DEFAULT_MODEL,
+    LITELLM_API_KEY,
+    LITELLM_OPENAI_BASE_URL,
+    LITELLM_TIMEOUT_SECONDS,
+    model_aliases,
+)
 
 
 client = OpenAI(
     base_url=LITELLM_OPENAI_BASE_URL,
     api_key=LITELLM_API_KEY,
-    timeout=60.0,
+    timeout=LITELLM_TIMEOUT_SECONDS,
 )
 
 
@@ -61,6 +67,6 @@ def build_langchain_chat_model(model: str = DEFAULT_MODEL, **kwargs: Any) -> Any
         model=model,
         base_url=LITELLM_OPENAI_BASE_URL,
         api_key=LITELLM_API_KEY,
-        timeout=60.0,
+        timeout=LITELLM_TIMEOUT_SECONDS,
         **kwargs,
     )

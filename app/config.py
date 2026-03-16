@@ -26,6 +26,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 LITELLM_BASE_URL = os.getenv("LITELLM_BASE_URL", "http://localhost:4000")
 LITELLM_OPENAI_BASE_URL = LITELLM_BASE_URL
 LITELLM_API_KEY = os.getenv("LITELLM_API_KEY", "anything")
+LITELLM_TIMEOUT_SECONDS = float(os.getenv("LITELLM_TIMEOUT_SECONDS", "180"))
 DEFAULT_ROUTED_MODEL = os.getenv("LITELLM_MODEL_NAME", "local-phi3")
 PREFERRED_DEFAULT_MODEL = os.getenv("LITELLM_DEFAULT_MODEL", DEFAULT_ROUTED_MODEL)
 MODEL_CONFIG_FILE = os.getenv("LITELLM_MODEL_CONFIG_FILE", "config/models.json")
@@ -53,7 +54,7 @@ def _single_model_definition() -> ModelDefinition:
 
     if provider == "ollama":
         return ModelDefinition(
-            model_name=DEFAULT_MODEL,
+            model_name=PREFERRED_DEFAULT_MODEL,
             provider=provider,
             model=os.getenv("OLLAMA_MODEL", "phi3"),
             api_base=os.getenv("OLLAMA_API_BASE", "http://host.docker.internal:11434"),
@@ -61,7 +62,7 @@ def _single_model_definition() -> ModelDefinition:
 
     if provider in {"openai_oss", "openai-oss"}:
         return ModelDefinition(
-            model_name=DEFAULT_MODEL,
+            model_name=PREFERRED_DEFAULT_MODEL,
             provider="openai_oss",
             model=os.getenv("OPENAI_OSS_MODEL", "gpt-oss:20b"),
             api_base=os.getenv("OLLAMA_API_BASE", "http://host.docker.internal:11434"),
@@ -69,7 +70,7 @@ def _single_model_definition() -> ModelDefinition:
 
     if provider == "openai":
         return ModelDefinition(
-            model_name=DEFAULT_MODEL,
+            model_name=PREFERRED_DEFAULT_MODEL,
             provider=provider,
             model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
             api_key_env="OPENAI_API_KEY",
@@ -77,7 +78,7 @@ def _single_model_definition() -> ModelDefinition:
 
     if provider == "gemini":
         return ModelDefinition(
-            model_name=DEFAULT_MODEL,
+            model_name=PREFERRED_DEFAULT_MODEL,
             provider=provider,
             model=os.getenv("GEMINI_MODEL", "gemini-2.0-flash"),
             api_key_env="GEMINI_API_KEY",
