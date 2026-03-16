@@ -7,6 +7,21 @@ PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 cd "$PROJECT_ROOT"
 
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Docker is required to run LiteLLM. Install Docker Desktop (or Docker Engine + Docker Compose) first." >&2
+  exit 1
+fi
+
+if ! docker compose version >/dev/null 2>&1; then
+  echo "Docker Compose v2 is required. Install Docker Desktop or enable the Docker Compose plugin." >&2
+  exit 1
+fi
+
+if ! docker info >/dev/null 2>&1; then
+  echo "Docker is installed, but the Docker daemon is not reachable. Start Docker Desktop and try again." >&2
+  exit 1
+fi
+
 docker compose up --build -d
 
 echo "Waiting for LiteLLM on http://localhost:4000/health ..."

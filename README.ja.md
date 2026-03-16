@@ -9,11 +9,33 @@ Local LLM を easy に試せる最小構成です。
 ## Requirements
 
 - Python 3.12+
-- Docker
+- Docker Desktop 推奨、または Docker Engine + Docker Compose
 - `uv`
 - `Ollama`
 
+## セットアップ前に Docker を確認
+
+Docker を使うのが初めてなら、先にここだけ確認してください。
+
+1. Docker Desktop をインストールして起動します。
+
+   Linux の場合は Docker Engine と Docker Compose を入れて、Docker daemon が起動している状態にします。
+
+2. Docker が使えることを確認します。
+
+```bash
+docker --version
+```
+
+3. あとで LiteLLM を起動するときに使うコマンドはこれです。
+
+```bash
+./scripts/start_server.sh
+```
+
 ## Setup
+
+インストーラは Docker がインストール済みで、起動中である前提です。
 
 ### macOS / Linux / WSL
 
@@ -41,7 +63,7 @@ ollama serve
 ./scripts/start_server.sh
 ```
 
-このスクリプトは Docker をバックグラウンドで起動し、`http://localhost:4000/health` が通るまで待機します。
+このスクリプトは Docker を使って LiteLLM を起動し、`http://localhost:4000/health` が通るまで待機します。
 
 3. 別ターミナルで動作確認
 
