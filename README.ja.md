@@ -127,12 +127,47 @@ ollama pull gpt-oss:20b
 
 これでアプリ側のコードを変えずに、`.env` だけで切り替えられます。
 
+## 複数モデルを登録する
+
+LangGraph のようなオーケストレーション層から使う場合は、LiteLLM に複数モデルを同時に公開しておく方が扱いやすいです。
+
+1. ひな形をコピー
+
+```bash
+cp config/models.example.json config/models.json
+```
+
+2. `.env` で読み込む
+
+```dotenv
+LITELLM_MODEL_CONFIG_FILE=config/models.json
+LITELLM_DEFAULT_MODEL=local-llama32
+```
+
+3. LiteLLM を再起動
+
+```bash
+./scripts/restart_server.sh
+```
+
+すると [`config/litellm.yaml`](/home/ishigaki/local-llm/config/litellm.yaml) に JSON 内の各モデル alias が並び、外部のオーケストレータから model 名で選べるようになります。
+
 ## Python usage
 
 ```python
-from app.llm_client import chat
+from app.llm_client import chat, chat_messages, configured_models
 
 print(chat("Explain robotics briefly"))
+print(configured_models())
+print(
+    chat_messages(
+        [
+            {"role": "system", "content": "Answer briefly."},
+            {"role": "user", "content": "Explain robotics briefly"},
+        ],
+        model="local-llama32",
+    )
+)
 ```
 
 クライアントは LiteLLM の endpoint を使います:
@@ -149,6 +184,22 @@ client = OpenAI(
 ```bash
 docker compose logs -f litellm
 ```
+
+## LangGraph と統合する
+
+オプション依存を入れます。
+
+```bash
+uv sync --extra orchestration
+```
+
+次にサンプルを実行します。
+
+```bash
+uv run python scripts/run_langgraph_debate.py
+```
+
+サンプルの graph は [`orchestrator/langgraph_workflow.py`](/home/ishigaki/local-llm/orchestrator/langgraph_workflow.py) にあります。LiteLLM をモデル gateway、LangGraph を状態管理と分岐に限定しているので、責務を分けたまま拡張しやすい構成です。
 
 ## More
 

@@ -127,12 +127,47 @@ ollama pull gpt-oss:20b
 
 This keeps your app code unchanged and switches the routed model through `.env`.
 
+## Register multiple models
+
+For orchestration tools such as LangGraph, it is often better to expose several routed models at once.
+
+1. Copy the example model catalog:
+
+```bash
+cp config/models.example.json config/models.json
+```
+
+2. Point `.env` at the file:
+
+```dotenv
+LITELLM_MODEL_CONFIG_FILE=config/models.json
+LITELLM_DEFAULT_MODEL=local-llama32
+```
+
+3. Restart LiteLLM:
+
+```bash
+./scripts/restart_server.sh
+```
+
+The generated [`config/litellm.yaml`](/home/ishigaki/local-llm/config/litellm.yaml) will then publish every model alias in the JSON file.
+
 ## Python usage
 
 ```python
-from app.llm_client import chat
+from app.llm_client import chat, chat_messages, configured_models
 
 print(chat("Explain robotics briefly"))
+print(configured_models())
+print(
+    chat_messages(
+        [
+            {"role": "system", "content": "Answer briefly."},
+            {"role": "user", "content": "Explain robotics briefly"},
+        ],
+        model="local-llama32",
+    )
+)
 ```
 
 The client uses the LiteLLM endpoint:
@@ -149,6 +184,22 @@ To follow the LiteLLM logs:
 ```bash
 docker compose logs -f litellm
 ```
+
+## LangGraph integration
+
+Install the optional orchestration dependencies:
+
+```bash
+uv sync --extra orchestration
+```
+
+Then run the sample workflow:
+
+```bash
+uv run python scripts/run_langgraph_debate.py
+```
+
+The sample graph lives in [`orchestrator/langgraph_workflow.py`](/home/ishigaki/local-llm/orchestrator/langgraph_workflow.py). It uses LiteLLM as the model gateway and LangGraph only for state orchestration, which keeps the responsibilities clean.
 
 ## More
 

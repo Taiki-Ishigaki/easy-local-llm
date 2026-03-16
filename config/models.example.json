@@ -1,0 +1,20 @@
+[
+  {
+    "model_name": "local-llama32",
+    "provider": "ollama",
+    "model": "llama3.2",
+    "api_base": "http://host.docker.internal:11434"
+  },
+  {
+    "model_name": "local-gpt-oss",
+    "provider": "openai_oss",
+    "model": "gpt-oss:20b",
+    "api_base": "http://host.docker.internal:11434"
+  },
+  {
+    "model_name": "cloud-openai",
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "api_key_env": "OPENAI_API_KEY"
+  }
+]

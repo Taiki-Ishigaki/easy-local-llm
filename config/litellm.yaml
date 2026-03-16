@@ -1,5 +1,5 @@
 model_list:
-  - model_name: local-gpt-oss
+  - model_name: local-phi3
     litellm_params:
-      model: ollama/gpt-oss:20b
+      model: ollama/phi3
       api_base: http://host.docker.internal:11434
