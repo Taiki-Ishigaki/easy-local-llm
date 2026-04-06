@@ -91,6 +91,22 @@ To see which model is currently selected:
 ./scripts/show_model.sh
 ```
 
+To start an interactive chat:
+
+```bash
+./scripts/chat.sh
+```
+
+Useful commands inside the chat:
+
+```text
+/help
+/models
+/model <alias>
+/reset
+/quit
+```
+
 ## Change provider and model with `.env`
 
 Copy `.env.example` to `.env`, then update the values for the provider you want:
@@ -196,6 +212,12 @@ print(
         model="local-llama32",
     )
 )
+```
+
+For an interactive terminal chat, run:
+
+```bash
+./scripts/chat.sh --system "Answer briefly."
 ```
 
 The client uses the LiteLLM endpoint:

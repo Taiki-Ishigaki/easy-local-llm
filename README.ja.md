@@ -91,6 +91,22 @@ uv run python scripts/test_llm.py
 ./scripts/show_model.sh
 ```
 
+対話しながら使いたいとき:
+
+```bash
+./scripts/chat.sh
+```
+
+チャット中の主なコマンド:
+
+```text
+/help
+/models
+/model <alias>
+/reset
+/quit
+```
+
 ## `.env` でプロバイダとモデルを切り替える
 
 `.env.example` を `.env` にコピーして、使いたいプロバイダに合わせて値を変えます。
@@ -196,6 +212,12 @@ print(
         model="local-llama32",
     )
 )
+```
+
+ターミナルで対話したい場合:
+
+```bash
+./scripts/chat.sh --system "短く答えてください。"
 ```
 
 クライアントは LiteLLM の endpoint を使います:

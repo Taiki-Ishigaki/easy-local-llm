@@ -126,6 +126,22 @@ uv run python scripts/test_llm.py
 
 このテストは `app/llm_client.py` から LiteLLM に接続し、最終的に `.env` で選んだプロバイダへ到達します。
 
+対話しながら試す場合:
+
+```bash
+./scripts/chat.sh
+```
+
+主なチャットコマンド:
+
+```text
+/help
+/models
+/model <alias>
+/reset
+/quit
+```
+
 ## Python usage
 
 ```python
