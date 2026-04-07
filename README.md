@@ -57,6 +57,23 @@ install/install.ps1
 ollama serve
 ```
 
+Linux note:
+
+If you use Docker Engine on Linux, `ollama serve` may listen on
+`127.0.0.1:11434` only. In that case LiteLLM can resolve
+`host.docker.internal`, but it still cannot reach Ollama from the container.
+
+The recommended fix in this repo is to keep `ollama serve` as-is and start
+LiteLLM in host-network mode:
+
+```bash
+./scripts/start_server.sh --linux-hostnet
+```
+
+This uses [`docker-compose.linux-hostnet.yml`](/Users/a896/Documents/workspace/easy-local-llm/docker-compose.linux-hostnet.yml),
+sets `OLLAMA_API_BASE=http://127.0.0.1:11434`, and binds LiteLLM to
+`127.0.0.1:4000`.
+
 2. Start LiteLLM
 
 ```bash
@@ -79,10 +96,22 @@ To stop LiteLLM:
 ./scripts/stop_server.sh
 ```
 
+Linux host-network mode:
+
+```bash
+./scripts/stop_server.sh --linux-hostnet
+```
+
 To restart LiteLLM:
 
 ```bash
 ./scripts/restart_server.sh
+```
+
+Linux host-network mode:
+
+```bash
+./scripts/restart_server.sh --linux-hostnet
 ```
 
 To see which model is currently selected:
@@ -154,6 +183,13 @@ Then pull the model if needed and restart LiteLLM. For local OpenAI OSS, pull th
 ```bash
 ollama pull llama3.2
 ./scripts/start_server.sh
+```
+
+On Linux host-network mode:
+
+```bash
+ollama pull llama3.2
+./scripts/start_server.sh --linux-hostnet
 ```
 
 OpenAI OSS example:

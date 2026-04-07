@@ -57,6 +57,23 @@ install/install.ps1
 ollama serve
 ```
 
+Linux 向けの補足:
+
+Docker Engine を使う Linux では、`ollama serve` が
+`127.0.0.1:11434` にだけ bind されることがあります。この場合、
+LiteLLM コンテナから `host.docker.internal` は引けても、Ollama には届きません。
+
+この repo では、`ollama serve` はそのままにして LiteLLM を
+host network で起動する方法を推奨します。
+
+```bash
+./scripts/start_server.sh --linux-hostnet
+```
+
+これは [`docker-compose.linux-hostnet.yml`](/Users/a896/Documents/workspace/easy-local-llm/docker-compose.linux-hostnet.yml)
+を使い、`OLLAMA_API_BASE=http://127.0.0.1:11434` として LiteLLM を
+`127.0.0.1:4000` に bind します。
+
 2. LiteLLM を起動
 
 ```bash
@@ -79,10 +96,22 @@ uv run python scripts/test_llm.py
 ./scripts/stop_server.sh
 ```
 
+Linux の host network モード:
+
+```bash
+./scripts/stop_server.sh --linux-hostnet
+```
+
 再起動するとき:
 
 ```bash
 ./scripts/restart_server.sh
+```
+
+Linux の host network モード:
+
+```bash
+./scripts/restart_server.sh --linux-hostnet
 ```
 
 現在どのモデルに向いているか確認するとき:
@@ -154,6 +183,13 @@ GEMINI_API_KEY=...
 ```bash
 ollama pull llama3.2
 ./scripts/start_server.sh
+```
+
+Linux の host network モード:
+
+```bash
+ollama pull llama3.2
+./scripts/start_server.sh --linux-hostnet
 ```
 
 OpenAI OSS の例:

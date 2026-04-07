@@ -5,6 +5,11 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
+. "$SCRIPT_DIR/compose_mode.sh"
+
+parse_compose_mode_args "$@"
+require_linux_for_hostnet
+
 cd "$PROJECT_ROOT"
 
 echo "[1/5] Routed model"
@@ -26,6 +31,6 @@ ollama list
 echo
 
 echo "[5/5] Ollama reachability from LiteLLM container"
-docker compose exec -T litellm python -c "import os, urllib.request; base=os.getenv('OLLAMA_API_BASE', 'http://host.docker.internal:11434'); print(urllib.request.urlopen(f'{base}/api/tags', timeout=5).read().decode())"
+run_compose exec -T litellm python -c "import os, urllib.request; base=os.getenv('OLLAMA_API_BASE', 'http://host.docker.internal:11434'); print(urllib.request.urlopen(f'{base}/api/tags', timeout=5).read().decode())"
 echo
 echo "Checks completed."

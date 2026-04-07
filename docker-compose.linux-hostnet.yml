@@ -1,0 +1,21 @@
+services:
+  litellm:
+    build:
+      context: .
+      dockerfile: Docker/Dockerfile
+    network_mode: host
+    volumes:
+      - ./config:/app/config
+    environment:
+      LITELLM_PROVIDER: ${LITELLM_PROVIDER:-ollama}
+      LITELLM_MODEL_NAME: ${LITELLM_MODEL_NAME:-local-phi3}
+      LITELLM_MODEL_CONFIG_FILE: ${LITELLM_MODEL_CONFIG_FILE:-config/models.json}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-phi3}
+      OLLAMA_API_BASE: ${OLLAMA_API_BASE:-http://127.0.0.1:11434}
+      OPENAI_OSS_MODEL: ${OPENAI_OSS_MODEL:-gpt-oss:20b}
+      OPENAI_MODEL: ${OPENAI_MODEL:-gpt-4o-mini}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      GEMINI_MODEL: ${GEMINI_MODEL:-gemini-2.0-flash}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+    command: >
+      sh -c "python scripts/render_litellm_config.py && litellm --config config/litellm.yaml --host 127.0.0.1 --port 4000"
